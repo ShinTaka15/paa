@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Rating;
 use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class RatingApiController extends Controller
 {
     public function __construct()
     {
         // Terapkan middleware hanya pada metode store, update, dan destroy
-        $this->middleware('auth:api', ['except' => ['index', 'show']]);
+        $this->middleware('auth:api', ['except' => ['index', 'show', 'store']]);
     }
 
     public function index($id)
@@ -27,20 +29,22 @@ class RatingApiController extends Controller
 
     public function store(Request $request, $id)
     {
-    Log::info('User ID: ' . auth()->id());
+        // Ambil user yang sedang login dari token JWT
+        $user = auth()->user(); // atau JWTAuth::parseToken()->authenticate();
+        Log::info('User ID: ' . $user->id);
 
-    $validatedData = $request->validate([
-        'rating_value' => 'required|integer|min:1|max:5',
-    ]);
+        $validatedData = $request->validate([
+            'rating_value' => 'required|integer|min:1|max:5',
+        ]);
 
-    $validatedData['wisata_id'] = $id;
-    $validatedData['user_id'] = auth()->id();
+        $validatedData['wisata_id'] = $id;
+        $validatedData['user_id'] = $user->id;
 
-    // Log::info('Validated Data: ', $validatedData); // Tambahkan ini untuk debugging json(auth()->user());
+        // Log::info('Validated Data: ', $validatedData); // Tambahkan ini untuk debugging
 
-    $rating = Rating::create($validatedData);
+        $rating = Rating::create($validatedData);
 
-    return response()->json(['message' => 'Rating berhasil ditambahkan', 'data' => $rating], 201);
+        return response()->json(['message' => 'Rating berhasil ditambahkan', 'data' => $rating], 201);
     }
 
 

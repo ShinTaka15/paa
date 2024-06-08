@@ -22,6 +22,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
+    Route::put('update', [AuthController::class, 'update']);
 });
 
 // Wisata routes
@@ -40,10 +41,10 @@ Route::delete('/event/{id}', [EventApiController::class, 'destroy'])->name('even
 // Rating routes without auth middleware for index and show
 Route::get('/wisata/{id}/ratings', [RatingApiController::class, 'index'])->name('wisata.ratings.index');
 Route::get('/wisata/{id}/ratings/{rating_id}', [RatingApiController::class, 'show'])->name('wisata.ratings.show');
+Route::post('/wisata/{id}/ratings', [RatingApiController::class, 'store'])->name('wisata.ratings.store');
 
 // Rating routes with auth middleware for store, update, and destroy
 Route::group(['middleware' => 'auth:api'], function () {
-    Route::post('/wisata/{id}/ratings', [RatingApiController::class, 'store'])->name('wisata.ratings.store');
     Route::put('/wisata/{id}/ratings/{rating_id}', [RatingApiController::class, 'update'])->name('wisata.ratings.update');
     Route::delete('/wisata/{id}/ratings/{rating_id}', [RatingApiController::class, 'destroy'])->name('wisata.ratings.destroy');
 });

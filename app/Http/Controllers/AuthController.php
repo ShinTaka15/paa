@@ -46,8 +46,31 @@ class AuthController extends Controller
             return response()->json(['message' => 'PENDAFTARAN GAGAL']);
         }
 
-
     }
+
+    public function update(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'name' => 'required'
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json($validator->messages(), 400);
+    }
+
+    $user = auth()->user();
+
+    if ($request->has('name')) {
+        $user->name = $request->input('name');
+    }
+
+    if ($user->save()) {
+        return response()->json(['message' => 'USER BERHASIL DIPERBARUI']);
+    } else {
+        return response()->json(['message' => 'GAGAL MEMPERBARUI USER'], 500);
+    }
+}
+
     /**
      * Get a JWT via given credentials.
      *
@@ -109,7 +132,8 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60 //exp 1 jam
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'user' => auth()->user()
         ]);
     }
 }
